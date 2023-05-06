@@ -1,0 +1,89 @@
+% sqr_beam propagation example
+%
+clear;
+close("all");
+clc;
+
+L1=0.5; %side length
+M=5000; %number of samples
+dx1=L1/M; %src sample interval
+x1=-L1/2:dx1:L1/2-dx1; %src coords
+y1=x1;
+lambda=0.5*10^-6; %wavelength
+k=2*pi/lambda; %wavenumber
+w=0.1; %source half width (m)
+z=2*250; %propagation dist (m)
+
+[X1,Y1]=meshgrid(x1,y1);
+u1=rect(X1/(2*w)).*rect(Y1/(2*w)); %src field
+
+%
+zf=7;
+r=0.01;
+P=circ(sqrt((X1.^2+Y1.^2)/(r^2)));
+u1=P.*u1;
+u1=focus(u1,L1,lambda,zf);
+% u2=propIR(u1,L1,lambda,2*zf); %propagation
+u5=propTF(u1,L1,lambda,1*zf);
+u6=propTF(u1,L1,lambda,10*zf);
+u2=propTF(u1,L1,lambda,2*zf);
+u3=focus(u2,L1,lambda,zf);
+u4=propTF(u3,L1,lambda,10*zf);
+
+x2=x1; %obs coords
+y2=y1;
+I1=abs(u1.^2); %src irradiance
+figure(1)
+imagesc(x1,y1,I1);
+axis square; axis xy;
+colormap('gray');  xlabel('x (m)'); ylabel('y (m)');
+title(['original signal']);
+
+I2=abs(u2.^2); %obs irrad
+figure(2) %display obs irrad
+imagesc(x2,y2,I2);
+axis square; axis xy;
+colormap('gray'); xlabel('x (m)'); ylabel('y (m)');
+title(['signal at the second lens plane']);
+
+I4=abs(u4.^2);
+figure(3) %display obs irrad
+imagesc(x1,y1,I4);
+axis square; axis xy;
+colormap('gray'); xlabel('x (m)'); ylabel('y (m)');
+title(['final signal after the second lens']);
+
+I5=abs(u5.^2);
+figure(4) %display obs irrad
+imagesc(x1,y1,I5);
+axis square; axis xy;
+colormap('gray'); xlabel('x (m)'); ylabel('y (m)');
+title(['signal at the focus plane of lens']);
+
+I6=abs(u6.^2);
+figure(5) %display obs irrad
+imagesc(x1,y1,I6);
+axis square; axis xy;
+colormap('gray'); xlabel('x (m)'); ylabel('y (m)');
+title(['signal after the one lens and pass 10*focus_length.' ...
+    'this is the result when using only one lens.' ...
+    'laser beam is largered 9 times       .']);
+
+
+
+% 
+%  %
+% figure(3) %irradiance profile
+% plot(x2,I2(M/2+1,:));
+% xlabel('x (m)'); ylabel('Irradiance');
+% title(['z= ',num2str(z),' m']);
+% %
+% figure(4) %plot obs field mag
+% plot(x2,abs(u2(M/2+1,:)));
+% xlabel('x (m)'); ylabel('Magnitude');
+% title(['z= ',num2str(z),' m']);
+% %
+% figure(5) %plot obs field phase
+% plot(x2,unwrap(angle(u2(M/2+1,:))));
+% xlabel('x (m)'); ylabel('Phase (rad)');
+% title(['z= ',num2str(z),' m']);
